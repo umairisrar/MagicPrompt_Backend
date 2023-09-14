@@ -93,7 +93,14 @@ export const handleWebhooks = async (request, response) => {
         });
         if (existUser) {
           let document = doc(firestore, "users", singleUserid);
-          await updateDoc(document, { plan: true });
+          await updateDoc(document, {
+            plan: true,
+            userInfo: {
+              name: customer.name,
+              paymentStatus: event.data.object?.payment_status,
+              profession: event.data.object?.custom_fields[0]?.text?.value,
+            },
+          });
           return;
         } else {
           try {
