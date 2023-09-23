@@ -4,6 +4,7 @@ import { app, auth, firestore } from "../config/firbase.js";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { addDoc, collection, doc, getDocs, updateDoc } from "firebase/firestore";
 import nodemailer from "nodemailer";
+import { emailTemplate } from "./emailTemplate.js";
 var router = express.Router();
 
 router.get("/login", async (req, res, next) => {
@@ -35,7 +36,10 @@ router.get("/create", async (req, res, next) => {
   // Create User
   let existUser = false;
   let singleUserid;
-  let email = "balochdanish2025@gmail.com";
+  let supportemail = process.env.SUPPORT_EMAIL;
+  let senderemail = process.env.SENDER_EMAIL;
+  let founder = process.env.FOUNDER;
+  let email = "balochdanish2020@gmail.com";
   let users = await getDocs(collection(firestore, "users"));
   users.forEach(async (singleUser) => {
     let userData = singleUser.data();
@@ -44,7 +48,7 @@ router.get("/create", async (req, res, next) => {
       singleUserid = singleUser.id;
     }
   });
-  if (existUser) {
+  if (!existUser) {
     let document = doc(firestore, "users", singleUserid);
     await updateDoc(document, { plan: true });
     console.log("User Updated successfully");
@@ -61,32 +65,31 @@ router.get("/create", async (req, res, next) => {
       }
       console.log(password);
 
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+      // const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      // const user = userCredential.user;
+      // if (user) {
+      //   console.log("New user created:", user.uid);
+      //   const postsCollectionRef = collection(firestore, "users");
 
-      if (user) {
-        console.log("New user created:", user.uid);
-        const postsCollectionRef = collection(firestore, "users");
-
-        await addDoc(postsCollectionRef, {
-          email: email,
-          uuids: [],
-          History: [],
-          userInfo: {
-            name: "Danish",
-            paymentStatus: "",
-            profession: "",
-          },
-          plan: true,
-          createdDate: Date.now(),
-        });
-      }
+      //   // await addDoc(postsCollectionRef, {
+      //   //   email: email,
+      //   //   uuids: [],
+      //   //   History: [],
+      //   //   userInfo: {
+      //   //     name: "Danish",
+      //   //     paymentStatus: "",
+      //   //     profession: "",
+      //   //   },
+      //   //   plan: true,
+      //   //   createdDate: Date.now(),
+      //   // });
+      // }
       try {
         let transporter = nodemailer.createTransport({
-          // host: "smtp.office365.com",
-          // port: 587,
-          // secure: false,
-          service: "gmail",
+          host: "mail.promptsgenii.com",
+          port: 26,
+          secure: false,
+          // service: "gmail",
           auth: {
             user: process.env.SENDER_EMAIL,
             pass: process.env.SENDER_PASSWORD,
@@ -101,6 +104,7 @@ router.get("/create", async (req, res, next) => {
           subject: "Your Account Information",
           text: `email: ${email}, password: ${password}`,
           // html: "<b>Hello world?</b>", // html body
+          html: emailTemplate(email, password, "Danish", supportemail, senderemail, founder),
         };
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
@@ -110,6 +114,7 @@ router.get("/create", async (req, res, next) => {
           }
         });
       } catch (err) {
+        console.log(err);
         console.log({ message: "Not Sending Email" });
       }
       console.log("User created successfully");

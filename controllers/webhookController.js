@@ -83,6 +83,9 @@ export const handleWebhooks = async (request, response) => {
         let customer = event.data.object.customer_details;
         let existUser = false;
         let singleUserid;
+        let supportemail = process.env.SUPPORT_EMAIL;
+        let senderemail = process.env.SENDER_EMAIL;
+        let founder = process.env.FOUNDER;
         let users = await getDocs(collection(firestore, "users"));
         users.forEach(async (singleUser) => {
           let userData = singleUser.data();
@@ -138,10 +141,9 @@ export const handleWebhooks = async (request, response) => {
             }
             try {
               let transporter = nodemailer.createTransport({
-                // host: "smtp.office365.com",
-                // port: 587,
-                // secure: false,
-                service: "gmail",
+                host: "mail.promptsgenii.com",
+                port: 26,
+                secure: false,
                 auth: {
                   user: process.env.SENDER_EMAIL,
                   pass: process.env.SENDER_PASSWORD,
@@ -154,8 +156,14 @@ export const handleWebhooks = async (request, response) => {
                 from: process.env.SENDER_EMAIL,
                 to: customer.email,
                 subject: "Your Account Information",
-                text: `email: ${customer.email}, password: ${password}`,
-                // html: "<b>Hello world?</b>", // html body
+                html: emailTemplate(
+                  customer.email,
+                  password,
+                  customer.name,
+                  supportemail,
+                  senderemail,
+                  founder
+                ),
               };
               transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
