@@ -3,6 +3,7 @@ import { auth, firestore } from "../config/firbase.js";
 import stripe from "../utils/stripe.js";
 import nodemailer from "nodemailer";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { emailTemplate } from "../routes/emailTemplate.js";
 
 export const handleWebhooks = async (request, response) => {
   try {
@@ -81,20 +82,24 @@ export const handleWebhooks = async (request, response) => {
 
       case "checkout.session.completed":
         let customer = event.data.object.customer_details;
+        // console.log(customer);
         let existUser = false;
         let singleUserid;
         let supportemail = process.env.SUPPORT_EMAIL;
         let senderemail = process.env.SENDER_EMAIL;
         let founder = process.env.FOUNDER;
+        // console.log(supportemail, senderemail, founder);
         let users = await getDocs(collection(firestore, "users"));
         users.forEach(async (singleUser) => {
           let userData = singleUser.data();
           if (userData.email === customer.email) {
+            console.log(userData, "existing User");
             existUser = true;
             singleUserid = singleUser.id;
           }
         });
         if (existUser) {
+          // console.log("existing user");
           let document = doc(firestore, "users", singleUserid);
           await updateDoc(document, {
             plan: true,
@@ -104,6 +109,7 @@ export const handleWebhooks = async (request, response) => {
               profession: event.data.object?.custom_fields[0]?.text?.value,
             },
           });
+          // response.send("existing user");
           return;
         } else {
           try {
@@ -114,7 +120,7 @@ export const handleWebhooks = async (request, response) => {
               const randomIndex = Math.floor(Math.random() * chars.length);
               password += chars.charAt(randomIndex);
             }
-
+            console.log(password);
             const userCredential = await createUserWithEmailAndPassword(
               auth,
               customer.email,
@@ -139,6 +145,7 @@ export const handleWebhooks = async (request, response) => {
                 createdDate: Date.now(),
               });
             }
+
             try {
               let transporter = nodemailer.createTransport({
                 host: "mail.promptsgenii.com",
@@ -168,15 +175,21 @@ export const handleWebhooks = async (request, response) => {
               transporter.sendMail(mailOptions, (error, info) => {
                 if (error) {
                   console.log(error);
+                  // response.send(error);
                 } else {
+                  // response.send("Message sent: %s", info.messageId);
                   console.log("Message sent: %s", info.messageId);
                 }
               });
             } catch (err) {
+              // response.send(err);
+              console.log(err);
               console.log({ message: "Not Sending Email" });
             }
+
             console.log("User created successfully");
           } catch (error) {
+            // response.send(error);
             console.error("User creation error:", error);
           }
         }
