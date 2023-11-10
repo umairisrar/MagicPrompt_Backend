@@ -68,11 +68,13 @@ export const createUser = async (req, res) => {
       email,
       password
     );
+    console.log(userCredential);
     if (!userCredential) {
-      return res.status(500).send({ error: "Something went wrong" });
+      console.log("Email is already used");
+      return res.status(500).send({ error: "Email is already used" });
     }
     const postsCollectionRef = collection(firestore, "users");
-    await addDoc(postsCollectionRef, {
+    let addUser = await addDoc(postsCollectionRef, {
       email,
       coupon,
       uuids: [],
@@ -82,6 +84,10 @@ export const createUser = async (req, res) => {
       planType,
       userInfo: { name, paymentStatus: "", profession: "" },
     });
+    if (!addUser) {
+      console.log("Something went wrong");
+      return res.status(500).send({ error: "Something went wrong" });
+    }
     if (allCoupons.includes(coupon)) {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
@@ -92,13 +98,13 @@ export const createUser = async (req, res) => {
       }
     }
     console.log("New User Created Successfully");
-    return res.send({
+    return res.status(200).send({
       success: true,
       data: { message: "New User Created Successfully", errors: [], data: [] },
     });
   } catch (error) {
     console.log({ error: error.message });
-    return res.send({
+    return res.status(500).send({
       success: false,
       data: { message: error.message, errors: [], data: [] },
     });
