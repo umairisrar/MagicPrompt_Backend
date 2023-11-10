@@ -22,6 +22,7 @@ export const createUser = async (req, res) => {
     let name = values.Name;
     let coupon = values.Coupon;
     let password = values.Password;
+    console.log(email, name, coupon, password);
 
     if (
       !email ||
