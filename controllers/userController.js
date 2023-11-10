@@ -14,7 +14,6 @@ import { couponList } from "../coupons/coupons.js";
 export const createUser = async (req, res) => {
   try {
     let planType = "";
-
     let allCoupons = Object.values(couponList).flat();
     let values = req.body;
     let email = values.Email;
@@ -55,12 +54,12 @@ export const createUser = async (req, res) => {
         const data = docSnapshot.data();
         if (data.coupons.includes(coupon)) {
           console.log("Coupon Already Used");
-          return res.status(500).send({ error: "Coupon Already Used" });
+          return res.status(500).send({ message: "Coupon Already Used" });
         }
       }
     } else {
       console.log("Coupon is not valid");
-      return res.status(500).send({ error: "Coupon is not valid" });
+      return res.status(500).send({ message: "Coupon is not valid" });
     }
     console.log("ok3");
     const userCredential = await createUserWithEmailAndPassword(
@@ -71,7 +70,7 @@ export const createUser = async (req, res) => {
     console.log(userCredential);
     if (!userCredential) {
       console.log("Email is already used");
-      return res.status(500).send({ error: "Email is already used" });
+      return res.status(500).send({ message: "Email is already used" });
     }
     const postsCollectionRef = collection(firestore, "users");
     let addUser = await addDoc(postsCollectionRef, {
@@ -86,7 +85,7 @@ export const createUser = async (req, res) => {
     });
     if (!addUser) {
       console.log("Something went wrong");
-      return res.status(500).send({ error: "Something went wrong" });
+      return res.status(500).send({ message: "Something went wrong" });
     }
     if (allCoupons.includes(coupon)) {
       if (docSnapshot.exists()) {
@@ -98,16 +97,10 @@ export const createUser = async (req, res) => {
       }
     }
     console.log("New User Created Successfully");
-    return res.status(200).send({
-      success: true,
-      data: { message: "New User Created Successfully", errors: [], data: [] },
-    });
+    return res.status(200).send({ message: "New User Created Successfully" });
   } catch (error) {
     console.log({ error: error.message });
-    return res.status(500).send({
-      success: false,
-      data: { message: error.message, errors: [], data: [] },
-    });
+    return res.status(500).send({ message: error.message });
   }
 };
 
