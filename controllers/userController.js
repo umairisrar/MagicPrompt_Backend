@@ -121,26 +121,23 @@ export const subscriptionUser = async (req, res) => {
         data: doc.data(),
       });
     });
-    let specificusers = users.map((item, i) => {
-      console.log(item);
-      if (item.data.planType) {
-        if (item.data.planType === "T1") {
-          if (item.data.uuids.length > 1) {
-            return item.data;
+    let specificusers = users
+      .map((item, i) => {
+        console.log(item);
+        if (item.data.planType) {
+          if (item.data.planType === "T1" && item.data.uuids.length > 1) {
+            return item;
+          }
+          if (item.data.planType === "T2" && item.data.uuids.length > 5) {
+            return item;
+          }
+          if (item.data.planType === "T3" && item.data.uuids.length > 20) {
+            return item;
           }
         }
-        if (item.data.planType === "T2") {
-          if (item.data.uuids.length > 5) {
-            return item.data;
-          }
-        }
-        if (item.data.planType === "T3") {
-          if (item.data.uuids.length > 20) {
-            return item.data;
-          }
-        }
-      }
-    });
+        return null;
+      })
+      .filter((item) => item !== null);
     return res.status(200).json({ specificusers });
   } catch (error) {
     console.error("Error fetching users:", error);
