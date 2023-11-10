@@ -38,11 +38,14 @@ export const createUser = async (req, res) => {
     console.log("ok1");
 
     if (coupon.includes("T1")) {
+      console.log("t1");
       planType = "T1";
     } else if (coupon.includes("T2")) {
       planType = "T2";
+      console.log("t2");
     } else if (coupon.includes("T3")) {
       planType = "T3";
+      console.log("t3");
     }
     console.log("ok2");
     let docRef;
