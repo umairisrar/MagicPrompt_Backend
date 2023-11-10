@@ -36,6 +36,7 @@ export const createUser = async (req, res) => {
     ) {
       return res.status(500).send({ error: "Please fill all fields" });
     }
+    console.log("ok1");
 
     if (coupon.includes("T1")) {
       planType = "T1";
@@ -44,6 +45,7 @@ export const createUser = async (req, res) => {
     } else if (coupon.includes("T3")) {
       planType = "T3";
     }
+    console.log("ok2");
     let docRef;
     let docSnapshot;
     if (allCoupons.includes(coupon)) {
@@ -52,12 +54,15 @@ export const createUser = async (req, res) => {
       if (docSnapshot.exists()) {
         const data = docSnapshot.data();
         if (data.coupons.includes(coupon)) {
+          console.log("Coupon Already Used");
           return res.status(500).send({ error: "Coupon Already Used" });
         }
       }
     } else {
+      console.log("Coupon is not valid");
       return res.status(500).send({ error: "Coupon is not valid" });
     }
+    console.log("ok3");
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
@@ -83,9 +88,10 @@ export const createUser = async (req, res) => {
         await setDoc(docRef, { coupons: initialData });
       }
     }
-
+    ("New User Created Successfully");
     res.send({ status: "New User Created Successfully" });
   } catch (error) {
+    console.log({ error: error.message });
     res.send({ error: error.message });
   }
 };
