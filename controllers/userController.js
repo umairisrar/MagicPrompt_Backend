@@ -12,7 +12,6 @@ import { couponList } from "../coupons/coupons.js";
 // import { addDoc } from "firebase/firestore";
 
 export const createUser = async (req, res) => {
-  console.log(req.body.Name);
   try {
     let planType = "";
 
@@ -22,7 +21,7 @@ export const createUser = async (req, res) => {
     let name = values.Name;
     let coupon = values.Coupon;
     let password = values.Password;
-    console.log(email, name, coupon, password);
+    console.log({ email, name, coupon, password });
 
     if (
       !email ||
