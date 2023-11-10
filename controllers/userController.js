@@ -17,10 +17,10 @@ export const createUser = async (req, res) => {
 
     let allCoupons = Object.values(couponList).flat();
     let values = req.body;
-    let email = values.EMAIL;
-    let name = values.FullName;
-    let coupon = values.COUPON;
-    let password = values.PASSWORD;
+    let email = values.Email;
+    let name = values.Name;
+    let coupon = values.Coupon;
+    let password = values.Password;
 
     if (
       !email ||
