@@ -48,6 +48,7 @@ export const createUser = async (req, res) => {
     console.log("ok2");
     let docRef;
     let docSnapshot;
+    console.log(allCoupons);
     if (allCoupons.includes(coupon)) {
       docRef = doc(firestore, "coupons", "used_coupons");
       docSnapshot = await getDoc(docRef);
@@ -88,7 +89,7 @@ export const createUser = async (req, res) => {
         await setDoc(docRef, { coupons: initialData });
       }
     }
-    ("New User Created Successfully");
+    console.log("New User Created Successfully");
     res.send({ status: "New User Created Successfully" });
   } catch (error) {
     console.log({ error: error.message });
