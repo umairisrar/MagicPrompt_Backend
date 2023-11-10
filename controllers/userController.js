@@ -21,7 +21,6 @@ export const createUser = async (req, res) => {
     let name = values.Name;
     let coupon = values.Coupon;
     let password = values.Password;
-    console.log({ email, name, coupon, password });
 
     if (
       !email ||
@@ -35,7 +34,6 @@ export const createUser = async (req, res) => {
     ) {
       return res.status(500).send({ error: "Please fill all fields" });
     }
-    console.log("ok1");
 
     if (coupon.includes("T1")) {
       console.log("t1");
@@ -47,10 +45,9 @@ export const createUser = async (req, res) => {
       planType = "T3";
       console.log("t3");
     }
-    console.log("ok2");
+
     let docRef;
     let docSnapshot;
-    console.log(allCoupons);
     if (allCoupons.includes(coupon)) {
       docRef = doc(firestore, "coupons", "used_coupons");
       docSnapshot = await getDoc(docRef);
@@ -92,10 +89,16 @@ export const createUser = async (req, res) => {
       }
     }
     console.log("New User Created Successfully");
-    res.send({ status: "New User Created Successfully" });
+    return res.send({
+      success: true,
+      data: { message: "New User Created Successfully", errors: [], data: [] },
+    });
   } catch (error) {
     console.log({ error: error.message });
-    res.send({ error: error.message });
+    return res.send({
+      success: false,
+      data: { message: error.message, errors: [], data: [] },
+    });
   }
 };
 
