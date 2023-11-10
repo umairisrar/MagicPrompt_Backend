@@ -68,6 +68,9 @@ export const createUser = async (req, res) => {
       email,
       password
     );
+    if (!userCredential) {
+      return res.status(500).send({ error: "Something went wrong" });
+    }
     const postsCollectionRef = collection(firestore, "users");
     await addDoc(postsCollectionRef, {
       email,
