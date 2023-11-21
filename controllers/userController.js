@@ -76,6 +76,7 @@ export const createUser = async (req, res) => {
     let addUser = await addDoc(postsCollectionRef, {
       email,
       coupon,
+      plan: true,
       uuids: [],
       History: [],
       paid: true,
