@@ -24,7 +24,6 @@ export const createUser = async (req, res) => {
     let name = values.Name;
     let coupon = values.Coupon;
     let password = values.Password;
-    await sendEmailtoUser(email, password, coupon, name);
     if (
       !email ||
       email.trim === "" ||
@@ -118,7 +117,6 @@ export const createUser = async (req, res) => {
         coupon,
         uuids: [],
         History: [],
-        paid: true,
         createdDate: Date.now(),
         planType,
         userInfo: { name, paymentStatus: "", profession: "" },
@@ -131,13 +129,13 @@ export const createUser = async (req, res) => {
         if (docSnapshot.exists()) {
           const data = docSnapshot.data();
           await setDoc(docRef, { coupons: [...data.coupons, coupon] });
-          await sendEmailtoUser(email, password, coupon, name);
         } else {
           const initialData = [coupon];
           await setDoc(docRef, { coupons: initialData });
-          await sendEmailtoUser(email, password, coupon, name);
         }
       }
+      await sendEmailtoUser(email, password, coupon, name);
+
       console.log("New User Created Successfully");
       return res.status(200).send({ message: "New User Created Successfully" });
     }
