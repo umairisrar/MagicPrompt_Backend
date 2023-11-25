@@ -7,9 +7,11 @@
 import app from "../app.js";
 import createDebug from "debug";
 import dotenv from "dotenv";
+import https from "https";
 
 import http from "http";
 import mongoose from "mongoose";
+import cron from "node-cron";
 
 dotenv.config();
 const debug = createDebug("wms-server:server");
@@ -83,17 +85,13 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
+// let serverUrl = "http://localhost:5000/";
+cron.schedule("*/12 * * * *", () => {
+  console.log("Cron job ran!");
+});
 
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
   debug("Listening on " + bind);
-  // mongoose
-  //   .connect(process.env.MONGODB_URL, {
-  //     useNewUrlParser: true,
-  //     dbName: "Voyagers",
-  //     useUnifiedTopology: true,
-  //   })
-  //   .then(() => debug("Database connected"))
-  //   .catch((err) => debug(err));
 }
