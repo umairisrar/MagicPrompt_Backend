@@ -1,1 +1,1 @@
-# voyagers-server
+# promptsgenii-server
