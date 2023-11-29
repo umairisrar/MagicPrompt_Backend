@@ -71,10 +71,7 @@ export const createUserTemplate = (
           <h1>Welcome to PromptsGenii</h1>
           <p>Dear ${username},</p>
           <p>I hope this email finds you well. We are thrilled to welcome you to the PromptsGenii family! Thank you for choosing our extension to enhance your experience. 🚀</p>
-          <p>To get started with PromptsGenii, we've set up your account and are excited to provide you with your login credentials:</p>
-          <ul>
-              <li><strong>Email:</strong> ${email}</li>
-          </ul>
+     
           <p>To begin your creative journey, please follow these steps:</p>
           <ol>
               <li class = 'listyle'>If PromptsGenii is available on the Chrome Web Store, you can install it from there.</li>
