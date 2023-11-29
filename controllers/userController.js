@@ -12,6 +12,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { couponList } from "../coupons/coupons.js";
 import nodemailer from "nodemailer";
 import { emailTemplate } from "../routes/emailTemplate.js";
+import { createUserTemplate } from "../routes/createUserTemplate.js";
 
 // import { addDoc } from "firebase/firestore";
 
@@ -167,7 +168,7 @@ const sendEmailtoUser = async (email, password, coupon, name) => {
       from: senderemail,
       to: email,
       subject: "Your Account Information",
-      html: emailTemplate(
+      html: createUserTemplate(
         email,
         password,
         name,
