@@ -169,6 +169,7 @@ export const createUser = async (req, res) => {
       !password ||
       password.trim === ""
     ) {
+      console.log("Please fill all fields");
       return res.status(500).send({ error: "Please fill all fields" });
     }
 
