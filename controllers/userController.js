@@ -13,10 +13,144 @@ import { couponList } from "../coupons/coupons.js";
 import nodemailer from "nodemailer";
 import { emailTemplate } from "../routes/emailTemplate.js";
 import { createUserTemplate } from "../routes/createUserTemplate.js";
+import { generateRandomString } from "../utils/generateRandomString.js";
 
 // import { addDoc } from "firebase/firestore";
 
+// export const createUser = async (req, res) => {
+//   try {
+//     let planType = "";
+//     let allCoupons = Object.values(couponList).flat();
+//     let values = req.body;
+//     let email = values.Email;
+//     let name = values.Name;
+//     let coupon = values.Coupon;
+//     let password = values.Password;
+//     if (
+//       !email ||
+//       email.trim === "" ||
+//       !coupon ||
+//       coupon.trim === "" ||
+//       !name ||
+//       name.trim === "" ||
+//       !password ||
+//       password.trim === ""
+//     ) {
+//       return res.status(500).send({ error: "Please fill all fields" });
+//     }
+
+//     if (coupon.includes("T1")) {
+//       planType = "T1";
+//     } else if (coupon.includes("T2")) {
+//       planType = "T2";
+//     } else if (coupon.includes("T3")) {
+//       planType = "T3";
+//     }
+
+//     let docRef;
+//     let docSnapshot;
+//     if (allCoupons.includes(coupon)) {
+//       docRef = doc(firestore, "coupons", "used_coupons");
+//       docSnapshot = await getDoc(docRef);
+//       if (docSnapshot.exists()) {
+//         const data = docSnapshot.data();
+//         if (data.coupons.includes(coupon)) {
+//           console.log("Coupon Already Used");
+//           return res.status(500).send({ message: "Coupon Already Used" });
+//         }
+//       }
+//     } else {
+//       console.log("Coupon is not valid");
+//       return res.status(500).send({ message: "Coupon is not valid" });
+//     }
+//     let existUser = false;
+//     let user_paid = false;
+//     let singleUserid;
+//     let users = await getDocs(collection(firestore, "users"));
+//     users.forEach(async (singleUser) => {
+//       let userData = singleUser.data();
+//       if (userData.email === email) {
+//         existUser = true;
+//         singleUserid = singleUser.id;
+//       }
+//     });
+//     if (existUser) {
+//       if (!user_paid) {
+//         let document = doc(firestore, "users", singleUserid);
+//         await updateDoc(document, {
+//           plan: true,
+//           userInfo: {
+//             name: name,
+//           },
+//           coupon,
+//           planType,
+//         });
+//         if (allCoupons.includes(coupon)) {
+//           if (docSnapshot.exists()) {
+//             const data = docSnapshot.data();
+//             await setDoc(docRef, { coupons: [...data.coupons, coupon] });
+//           } else {
+//             const initialData = [coupon];
+//             await setDoc(docRef, { coupons: initialData });
+//           }
+//         }
+//         let passwordvalue = "************";
+//         await sendEmailtoUser(email, passwordvalue, coupon, name);
+//         return res
+//           .status(200)
+//           .send({ message: "New User Updated Successfully" });
+//       } else {
+//         return res.status(500).send({ message: "you have already paid" });
+//       }
+//     } else {
+//       const userCredential = await createUserWithEmailAndPassword(
+//         auth,
+//         email,
+//         password
+//       );
+//       if (!userCredential) {
+//         console.log("Email is already in used");
+//         return res.status(500).send({ message: "Email is already used" });
+//       }
+//       const postsCollectionRef = collection(firestore, "users");
+//       let addUser = await addDoc(postsCollectionRef, {
+//         email,
+//         plan: true,
+//         coupon,
+//         uuids: [],
+//         History: [],
+//         createdDate: Date.now(),
+//         planType,
+//         plans: {
+
+//         },
+//         userInfo: { name, paymentStatus: "", profession: "" },
+//       });
+//       if (!addUser) {
+//         console.log("Something went wrong");
+//         return res.status(500).send({ message: "Something went wrong" });
+//       }
+//       if (allCoupons.includes(coupon)) {
+//         if (docSnapshot.exists()) {
+//           const data = docSnapshot.data();
+//           await setDoc(docRef, { coupons: [...data.coupons, coupon] });
+//         } else {
+//           const initialData = [coupon];
+//           await setDoc(docRef, { coupons: initialData });
+//         }
+//       }
+//       await sendEmailtoUser(email, password, coupon, name);
+
+//       console.log("New User Created Successfully");
+//       return res.status(200).send({ message: "New User Created Successfully" });
+//     }
+//   } catch (error) {
+//     console.log({ error: error.message });
+//     return res.status(500).send({ message: error.message });
+//   }
+// };
 export const createUser = async (req, res) => {
+  console.log(req.body);
   try {
     let planType = "";
     let allCoupons = Object.values(couponList).flat();
@@ -66,15 +200,42 @@ export const createUser = async (req, res) => {
     let user_paid = false;
     let singleUserid;
     let users = await getDocs(collection(firestore, "users"));
+    let allPlans = [];
     users.forEach(async (singleUser) => {
       let userData = singleUser.data();
       if (userData.email === email) {
+        allPlans = userData.plans ? userData.plans : [];
         existUser = true;
         singleUserid = singleUser.id;
       }
     });
+
+    let licenseKey = generateRandomString(26);
+    let planlength;
     if (existUser) {
       if (!user_paid) {
+        let filteredPlans = allPlans?.filter((item, i) => {
+          if (item.type.includes(planType)) {
+            return item;
+          }
+        });
+        if (filteredPlans.length >= 1) {
+          planlength = `${planType}_${filteredPlans?.length}`;
+        } else {
+          planlength = planType;
+        }
+        allPlans.push({
+          type: planlength,
+          licenseKey,
+          count:
+            planType === "T1"
+              ? 1
+              : planType === "T2"
+              ? 5
+              : planType === "T3"
+              ? 20
+              : null,
+        });
         let document = doc(firestore, "users", singleUserid);
         await updateDoc(document, {
           plan: true,
@@ -83,6 +244,7 @@ export const createUser = async (req, res) => {
           },
           coupon,
           planType,
+          plans: allPlans,
         });
         if (allCoupons.includes(coupon)) {
           if (docSnapshot.exists()) {
@@ -119,6 +281,22 @@ export const createUser = async (req, res) => {
         uuids: [],
         History: [],
         createdDate: Date.now(),
+        adminLogin: false,
+        loginIds: [],
+        plans: [
+          {
+            type: planType,
+            licenseKey: licenseKey,
+            count:
+              planType === "T1"
+                ? 1
+                : planType === "T2"
+                ? 5
+                : planType === "T3"
+                ? 20
+                : null,
+          },
+        ],
         planType,
         userInfo: { name, paymentStatus: "", profession: "" },
       });
