@@ -150,7 +150,6 @@ import { generateRandomString } from "../utils/generateRandomString.js";
 //   }
 // };
 export const createUser = async (req, res) => {
-  console.log(req.body);
   try {
     let planType = "";
     let allCoupons = Object.values(couponList).flat();
@@ -202,10 +201,35 @@ export const createUser = async (req, res) => {
     let singleUserid;
     let users = await getDocs(collection(firestore, "users"));
     let allPlans = [];
+    let couponarray;
     users.forEach(async (singleUser) => {
       let userData = singleUser.data();
       if (userData.email === email) {
-        allPlans = userData.plans ? userData.plans : [];
+        allPlans = userData.plans
+          ? userData.plans
+          : userData.plan
+          ? [
+              {
+                type: userData.planType,
+                licenseKey: generateRandomString(26),
+                count:
+                  userData.planType === "T1"
+                    ? 1
+                    : userData.planType === "T2"
+                    ? 5
+                    : userData.planType === "T3"
+                    ? 20
+                    : 1,
+              },
+            ]
+          : [];
+        couponarray = userData?.coupon ? userData?.coupon : [];
+        if (Array.isArray(couponarray)) {
+          couponarray.push(coupon);
+        } else if (typeof couponarray === "string") {
+          couponarray = [couponarray, coupon];
+        }
+
         existUser = true;
         singleUserid = singleUser.id;
       }
@@ -237,13 +261,16 @@ export const createUser = async (req, res) => {
               ? 20
               : null,
         });
+
+        console.log(allPlans);
+        console.log(couponarray);
         let document = doc(firestore, "users", singleUserid);
         await updateDoc(document, {
           plan: true,
           userInfo: {
             name: name,
           },
-          coupon,
+          coupon: couponarray,
           planType,
           plans: allPlans,
         });
@@ -278,10 +305,10 @@ export const createUser = async (req, res) => {
       let addUser = await addDoc(postsCollectionRef, {
         email,
         plan: true,
-        coupon,
+        coupon: [coupon],
         uuids: [],
         History: [],
-        createdDate: Date.now(),
+        createdDate: new Date(Date.now()),
         adminLogin: false,
         loginIds: [],
         plans: [
